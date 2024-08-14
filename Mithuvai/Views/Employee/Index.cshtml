@@ -1,0 +1,198 @@
+﻿@model Mithuvai.Models.Employee
+
+@section scripts {
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            loadEmployees();
+
+            // Load all employees
+            function loadEmployees() {
+                $.ajax({
+                    url: '@Url.Action("GetAllEmployees", "Employee")',
+                    type: 'GET',
+                    contentType: 'application/json;charset=UTF-8',
+                    dataType: 'json',
+                    success: function (result) {
+                        var html = '';
+                        $.each(result, function (key, item) {
+                            html += '<tr>';
+                            html += '<td>' + item.Name + '</td>';
+                            html += '<td>' + item.Designation + '</td>';
+                            html += '<td>' + item.Email + '</td>';
+                            html += '<td><a href="#" onclick="return getEmployeeById(' + item.Id + ')">Edit</a> | <a href="#" onclick="deleteEmployee(' + item.Id + ')">Delete</a></td>';
+                            html += '</tr>';
+                        });
+                        $('.tbody').html(html);
+                    },
+                    error: function (errormessage) {
+                        alert(errormessage.responseText);
+                    }
+                });
+            }
+
+            // Add Employee
+            $('#btnAdd').click(function () {
+                var employee = {
+                    Name: $('#Name').val(),
+                    Designation: $('#Designation').val(),
+                    Email: $('#Email').val()
+                };
+                $.ajax({
+                    url: '@Url.Action("Create", "Employee")',
+                    data: JSON.stringify(employee),
+                    type: 'POST',
+                    contentType: 'application/json;charset=UTF-8',
+                    dataType: 'json',
+                    success: function (result) {
+                        loadEmployees();
+                        clearTextBox();
+                    },
+                    error: function (errormessage) {
+                        alert(errormessage.responseText);
+                    }
+                });
+            });
+
+            // Get Employee by Id
+            window.getEmployeeById = function (id) {
+                $.ajax({
+                    url: '@Url.Action("GetEmployeeById", "Employee")/' + id,
+                    type: 'GET',
+                    contentType: 'application/json;charset=UTF-8',
+                    dataType: 'json',
+                    success: function (result) {
+                        $('#Id').val(result.Id);
+                        $('#Name').val(result.Name);
+                        $('#Designation').val(result.Designation);
+                        $('#Email').val(result.Email);
+                        $('#btnAdd').hide();
+                        $('#btnUpdate').show();
+                    },
+                    error: function (errormessage) {
+                        alert(errormessage.responseText);
+                    }
+                });
+                return false;
+            };
+
+            // Update Employee
+            $('#btnUpdate').click(function () {
+                var employee = {
+                    Id: $('#Id').val(),
+                    Name: $('#Name').val(),
+                    Designation: $('#Designation').val(),
+                    Email: $('#Email').val()
+                };
+                $.ajax({
+                    url: '@Url.Action("Update", "Employee")',
+                    data: JSON.stringify(employee),
+                    type: 'POST',
+                    contentType: 'application/json;charset=UTF-8',
+                    dataType: 'json',
+                    success: function (result) {
+                        loadEmployees();
+                        clearTextBox();
+                        $('#btnAdd').show();
+                        $('#btnUpdate').hide();
+                    },
+                    error: function (errormessage) {
+                        alert(errormessage.responseText);
+                    }
+                });
+            });
+
+
+            window.getEmployeeById = function (id) {
+    $.ajax({
+        url: '@Url.Action("GetEmployeeById", "Employee")/' + id,
+        type: 'GET',
+        contentType: 'application/json;charset=UTF-8',
+        dataType: 'json',
+        success: function (result) {
+            $('#Id').val(result.Id);
+            $('#Name').val(result.Name);
+            $('#Designation').val(result.Designation);
+            $('#Email').val(result.Email);
+            $('#btnAdd').hide();
+            $('#btnUpdate').show();
+        },
+        error: function (errormessage) {
+            alert(errormessage.responseText);
+        }
+    });
+    return false;
+};
+
+
+
+            // Delete Employee
+            window.deleteEmployee = function (id) {
+                var confirmation = confirm("Are you sure you want to delete this record?");
+                if (confirmation) {
+                    $.ajax({
+                        url: '@Url.Action("Delete", "Employee")/' + id,
+                        type: 'POST',
+                        contentType: 'application/json;charset=UTF-8',
+                        dataType: 'json',
+                        success: function (result) {
+                            loadEmployees();
+                        },
+                        error: function (errormessage) {
+                            alert(errormessage.responseText);
+                        }
+                    });
+                }
+                return false;
+            };
+
+            // Clear form fields
+            function clearTextBox() {
+                $('#Id').val("");
+                $('#Name').val("");
+                $('#Designation').val("");
+                $('#Email').val("");
+                $('#btnAdd').show();
+                $('#btnUpdate').hide();
+            }
+        });
+    </script>
+}
+
+<h2>Employee CRUD Operations</h2>
+
+<table>
+    <tr>
+        <td>Name:</td>
+        <td><input type="text" id="Name" /></td>
+    </tr>
+    <tr>
+        <td>Designation:</td>
+        <td><input type="text" id="Designation" /></td>
+    </tr>
+    <tr>
+        <td>Email:</td>
+        <td><input type="email" id="Email" /></td>
+    </tr>
+    <tr>
+        <td><input type="hidden" id="Id" /></td>
+        <td><input type="button" value="Add" id="btnAdd" /></td>
+        <td><input type="button" value="Update" id="btnUpdate" style="display:none;" /></td>
+    </tr>
+</table>
+
+<br />
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Designation</th>
+            <th>Email</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody class="tbody">
+        <!-- Data will be populated here -->
+    </tbody>
+</table>
